@@ -13,16 +13,5 @@ logfile_column_format = {
         'Username',
         'Type_of_access_destination_IP',
         'Response_type'
-    ],
-    'types': [float, 
-        int, 
-        str,
-        str,
-        int,
-        str,
-        str,
-        str,
-        str,
-        str
-    ],
+    ]
 }
