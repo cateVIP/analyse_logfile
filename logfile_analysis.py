@@ -4,7 +4,23 @@ pd.set_option("display.max_columns", None)
 # from settings import logfile_column_format
 import settings
 import json
+import zipfile
+import gzip
+from tempfile import mkdtemp
+from os import listdir
+from os.path import isfile, join, split ,splitext
 
+
+def unzip_file(file_path):
+    if splitext(file_path)[1][1:]== 'gz':
+        directory_to_extract_to = mkdtemp()
+        with gzip.open('file.txt.gz', 'rb') as f:
+            file_content = f.read()
+        #with zipfile.ZipFile(file_path, 'r') as zip_ref:
+         #   zip_ref.extractall(directory_to_extract_to)
+        return directory_to_extract_to
+    else:
+        return file_path
 
 def read_log(file_path):
     """
@@ -72,15 +88,35 @@ class Logfile_info:
     return self.df["Response_header_size_bytes"].sum() + self.df["Response_size_bytes"].sum()
 
 
-
-def read_input():
+def analyse_log_files():
     """
-    Communicates with the user to select inout/output paths and the operations to apply on the log file
+    Unzips and defines paths of the log files to be analysed.
     Returns:
-        A JSON file with the operation output
+        A JSON file for every logfile with the operation performed
     """
     # get the path of the log file to analyse
-    file_path = input("Please, enter the logfile path ")
+    input_path = input("Please, enter the input path ")
+    mypath = unzip_file(input_path)
+    if splitext(mypath)[1][1:]== "log":
+        read_input(mypath)
+    else:
+        onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f)) and splitext(join(mypath, f))== "log"]
+        for f in onlyfiles:
+            file_path = join(mypath, f)
+            question = input("Do you want to analyse this file? (yes/no), ", file_path)
+            if question == 'yes':
+                read_input(file_path)
+            else:
+                print("Ok, let's look at the next file")
+
+
+def read_input(file_path):
+    """
+    Communicates with the user to select input/output paths and the operations to apply on the log file
+    Returns:
+        A JSON file with the operations performed
+    """
+
     # read and prepare the log file
     df = read_log(file_path)
     # create class for the log file
@@ -155,8 +191,8 @@ def read_input():
 
 
 # The function is called
-read_input()
-
+#read_input()
+analyse_log_files()
 
 
 
