@@ -29,7 +29,7 @@ class File_Manipulator:
                     delim_whitespace=True, 
                     keep_default_na=False,
                     dtype= str,            # to avoid issues with IP addresses   
-                    on_bad_lines='skip')   # only 2 lines over more than 1M get skipped (less than 1e-4%) and the integrity of the other rows is preserved
+                    on_bad_lines='skip')   # only 2 lines over more than 1M got skipped in the example case (less than 1e-4%) and the integrity of the other rows is preserved
 
         # rename columns for common reference
         df.columns = settings.logfile_column_format['names']

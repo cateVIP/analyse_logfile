@@ -14,6 +14,11 @@ class Logfile_data_extractor:
     Returns:
         tuple of two dataframes, with the most and least IP addresses together with their counts.
     """
+    # check these are IP addresses
+    check_ip = self.df['Client_IP'].str.split('.').apply(len).unique()
+    if len(check_ip) != 1 or check_ip != 4:
+        print("These seem not IP addresses, please check your format with the settings")  
+         
     ip_freq = self.df['Client_IP'].value_counts().rename_axis('Client_IP').reset_index(name='counts') # drops Nas by default
     max_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].max()]
     min_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].min()]

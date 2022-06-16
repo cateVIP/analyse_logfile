@@ -30,11 +30,15 @@ class Logfile_analyzer:
         else:
             onlyfiles = [f for f in os.listdir(input_file_path) if 
                 os.path.isfile(os.path.join(input_file_path, f))
-                and os.path.splitext(os.path.join(input_file_path, f))[1][1:]== "log"]
+                and (os.path.splitext(os.path.join(input_file_path, f))[1][1:]== "log"
+                or f[-7:] == ".log.gz"
+                )]
             print("Files in the directory: ")
             print(onlyfiles)    
             for f in onlyfiles:
                 file_path = os.path.join(input_file_path, f)
+                if file_path.split(".")[-1] == "gz":
+                    input_file_path = self.file_manipulator.unzip_file(file_path)
                 while True:
                     print("file selected: ", f)
                     question = input("Do you want to analyse this file? ([y]/n]): ")
