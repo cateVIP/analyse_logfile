@@ -1,7 +1,6 @@
 import pandas as pd
 from distutils import errors
 
-
 class Logfile_data_extractor:
   """Logfile_data_extractor class
     This class contains the operations to perform on the logfile.
@@ -15,7 +14,7 @@ class Logfile_data_extractor:
     Returns:
         tuple of two dataframes, with the most and least IP addresses together with their counts.
     """
-    ip_freq = self.df['Client_IP'].value_counts().rename_axis('Client_IP').reset_index(name='counts')
+    ip_freq = self.df['Client_IP'].value_counts().rename_axis('Client_IP').reset_index(name='counts') # drops Nas by default
     max_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].max()]
     min_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].min()]
     return max_value, min_value
@@ -29,7 +28,11 @@ class Logfile_data_extractor:
     # convert the field to numeric: number of seconds
     self.df['Timestamp'] = pd.to_numeric(self.df['Timestamp'],  errors='coerce')
     # sort data as it is not time ordered
-    self.df= self.df.sort_values('Timestamp')
+    self.df.sort_values('Timestamp', inplace = True)
+    nrows1 = self.df.shape[0]
+    self.df.dropna(subset=['Timestamp'], inplace =True) # once sorted, the Nas will be at the end of the dataframe (by Timestamp)
+    if (nrows1 - self.df.shape[0])/nrows1*100 < 80:
+        print("More than 20% of the rowns have Nas in the Timestamp column.") 
     # time span of the log file
     time_span = self.df['Timestamp'].iloc[-1] - self.df['Timestamp'].iloc[0]
     # compute the events per seconds as total number of rows divided by the time span
@@ -45,4 +48,4 @@ class Logfile_data_extractor:
     # convert fields to numeric
     self.df[["Response_header_size_bytes","Response_size_bytes"]] = self.df[[
         "Response_header_size_bytes","Response_size_bytes"]].apply(pd.to_numeric, errors = 'coerce')
-    return self.df["Response_header_size_bytes"].sum() + self.df["Response_size_bytes"].sum()
+    return self.df["Response_header_size_bytes"].sum() + self.df["Response_size_bytes"].sum() # skipna is True by default
