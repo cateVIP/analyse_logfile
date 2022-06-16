@@ -5,7 +5,7 @@ import json
 import os
 
 class Logfile_analyzer:
-    """
+    """Logfile_analyzer class
     This class reads the user input to the log file(s) to be analysed, \
         let the user select which operations perform and writes the output to a json file.
     """

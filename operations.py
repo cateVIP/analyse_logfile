@@ -3,8 +3,8 @@ from distutils import errors
 
 
 class Logfile_data_extractor:
-  """Logfile class
-    This class extracts few info on the logfile.
+  """Logfile_data_extractor class
+    This class contains the operations to perform on the logfile.
   """
   def __init__(self, df):
       self.df = df
@@ -45,5 +45,4 @@ class Logfile_data_extractor:
     # convert fields to numeric
     self.df[["Response_header_size_bytes","Response_size_bytes"]] = self.df[[
         "Response_header_size_bytes","Response_size_bytes"]].apply(pd.to_numeric, errors = 'coerce')
-    #compute total bytes
     return self.df["Response_header_size_bytes"].sum() + self.df["Response_size_bytes"].sum()
