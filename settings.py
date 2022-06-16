@@ -1,5 +1,4 @@
-'''This file contains the settings to be able to read the log file.'''
-import numpy as np
+'''This file contains the format settings to be able to read the log file.'''
 
 logfile_column_format = {
     'names': [

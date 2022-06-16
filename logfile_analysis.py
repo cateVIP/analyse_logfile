@@ -1,101 +1,27 @@
+import read_input
+import operations
 from distutils import errors
-import pandas as pd
-pd.set_option("display.max_columns", None) 
-# from settings import logfile_column_format
-import settings
 import json
-import zipfile
-import gzip
-from tempfile import mkdtemp
 import os
-# from os import listdir
-# from os.path import isfile, join, split ,splitext
-import subprocess
-
-
-class Logfile_data_extractor:
-  """Logfile class
-    This class extracts few info on the logfile.
-  """
-  def __init__(self, df):
-      self.df = df
-
-  def ip_frequency(self):
-    """
-    Computes the most and lest frequent IP addresses in the log file.
-    Returns:
-        tuple of two dataframes, with the most and least IP addresses together with their counts.
-    """
-    ip_freq = self.df['Client_IP'].value_counts().rename_axis('Client_IP').reset_index(name='counts')
-    max_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].max()]
-    min_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].min()]
-    return max_value, min_value
-
-  def events_per_sec(self):
-    """
-    Computes the events per seconds of the log file.
-    Returns:
-        Number of events per second
-    """
-    # convert the field to numeric: number of seconds
-    self.df['Timestamp'] = pd.to_numeric(self.df['Timestamp'],  errors='coerce')
-    # sort data as it is not time ordered
-    self.df= self.df.sort_values('Timestamp')
-    # time span of the log file
-    time_span = self.df['Timestamp'].iloc[-1] - self.df['Timestamp'].iloc[0]
-    # compute the events per seconds as total number of rows divided by the time span
-    return self.df.shape[0] / time_span
-
-   
-  def total_bytes(self):
-    """
-    Compute the total bytes exchanged
-    Returns:
-        number of bytes 
-    """
-    # convert fields to numeric
-    self.df[["Response_header_size_bytes","Response_size_bytes"]] = self.df[[
-        "Response_header_size_bytes","Response_size_bytes"]].apply(pd.to_numeric, errors = 'coerce')
-    #compute total bytes
-    return self.df["Response_header_size_bytes"].sum() + self.df["Response_size_bytes"].sum()
-
-class File_Manipulator:
-
-    def unzip_file(self, file_path):
-        subprocess.run("gzip", "-d", "-k", "-c", file_path)
-        return file_path[:-4]
-
-    def import_csv_logfile(self, file_path):
-        """
-        Reads the log file and renames columns.
-        Arguments: 
-            file_path: string containing the path and name of the log file
-        Returns:
-            A pandas Dataframe
-        """
-        df = pd.read_csv(file_path, 
-                    delim_whitespace=True, 
-                    keep_default_na=False,
-                    dtype= str,
-                    on_bad_lines='skip') # peformanxe
-
-        # rename columns for common reference
-        df.columns = settings.logfile_column_format['names']
-        return df
 
 class Logfile_analyzer:
+    """
+    This class reads the user input to the log file(s) to be analysed, \
+        let the user select which operations perform and writes the output to a json file.
+    """
 
     def __init__(self):
-        self.file_manipulator = File_Manipulator()
+        self.file_manipulator = read_input.File_Manipulator()
         
     def read_path_from_user(self):
         """
-        Unzips and defines paths of the log files to be analysed.
+        Reads the path of the log file(s) from the user input and unzip the file if necessary.\
+            Then performes the operations on the file(s).
         Returns:
-            A JSON file for every logfile with the operation performed
+            A JSON file for every logfile with the performed analysis
         """
-        # get the path of the log file to analyse
         input_file_path = input("Please, enter the input path: ")
+        
         if input_file_path.split(".")[-1] == "gz":
             input_file_path = self.file_manipulator.unzip_file(input_file_path)
             
@@ -104,11 +30,14 @@ class Logfile_analyzer:
         else:
             onlyfiles = [f for f in os.listdir(input_file_path) if 
                 os.path.isfile(os.path.join(input_file_path, f))
-                and os.path.splitext(os.path.join(input_file_path, f))== "log"]
+                and os.path.splitext(os.path.join(input_file_path, f))[1][1:]== "log"]
+            print("Files in the directory: ")
+            print(onlyfiles)    
             for f in onlyfiles:
                 file_path = os.path.join(input_file_path, f)
                 while True:
-                    question = input("Do you want to analyse this file? ([y]/n]), ", file_path)
+                    print("file selected: ", f)
+                    question = input("Do you want to analyse this file? ([y]/n]): ")
                     if question == 'n':
                         print("Ok, let's look at the next file")
                         break
@@ -116,19 +45,20 @@ class Logfile_analyzer:
                         self.select_operation(file_path)
                         break
                     print("Sorry, what's your choice?")
+            print("No more files to analyse")
 
 
     def select_operation(self, file_path):
         """
-        Communicates with the user to select input/output paths and the operations to apply on the log file
+        Selects the operations to apply on the log file and writes the output file
+        Arguments:
+            file_path: path to the log file to be analysed
         Returns:
-            A JSON file with the operations performed
+            A JSON file with the performed operations
         """
 
-        # read and prepare the log file
         df = self.file_manipulator.import_csv_logfile(file_path)
-        # create class for the log file
-        log_info = Logfile_data_extractor(df)
+        log_info = operations.Logfile_data_extractor(df)
         # prepare output structure as a dictionary
         my_dict = {"Most_Frequent_IP":[],
             "Least_Frequent_IP":[],
@@ -170,7 +100,6 @@ class Logfile_analyzer:
             # version of a number is introduced, the
             # ValueError exception will be called.
             except ValueError:
-                # The cycle will go on until validation
                 print("Error! This is not a number. Try again.\n")
 
             else:
@@ -194,9 +123,4 @@ class Logfile_analyzer:
                         print("You have already selected this operation. Please try another one. \n")
                 else: 
                     print("There is no operation available with this number! Try again.\n")
-
-
-if __name__ == '__main__':
-    logfile = Logfile_analyzer()
-    logfile.read_path_from_user()
 
