@@ -1,7 +1,5 @@
-import logfile_analysis
-
-
 import sys, getopt
+import logfile_analysis
 
 def main(argv):
     inputfile = ''

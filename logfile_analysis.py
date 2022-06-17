@@ -20,15 +20,12 @@ class Logfile_analyser:
         Returns:
             A JSON file for all logfiles with the performed analysis
         """
-        #input_path = input("Please, enter the input path: ")
         if os.path.isdir(input_path):
             onlyfiles = [f for f in os.listdir(input_path) if 
                 os.path.isfile(os.path.join(input_path, f))
                 and (os.path.splitext(os.path.join(input_path, f))[1][1:]== "log"
                 or f[-7:] == ".log.gz"
                 )]
-            #print("Files in the directory: ")
-            #print(onlyfiles)    
             file_paths = [os.path.join(input_path, f) for f in onlyfiles]
         else:
             file_paths = [input_path]   
@@ -41,30 +38,21 @@ class Logfile_analyser:
                 except FileNotFoundError:
                     print(f"The file '{file_path}' is not in gzip format. Skipping.")
                     continue
-    
-            while True:
-                #answer = input("Do you want to analyse this file? ([y]/n]): ")
-                #if answer == 'n':
-                #    print("Ok, let's look at the next file")
-                #    break
-                #elif answer in ['y','']:
-                try:
-                    file_dict = self.select_operation(file_path)
-                except FileNotFoundError:
-                    print("Wrong input path: file not found")
-                except (ValueError, UnicodeDecodeError):
-                    print("Unrecognized log file format")
-                except Exception:
-                    print("An unknown error occurred while reading the file. Sorry for that!")
-                else:
-                    self.info_data_dict.update(file_dict)
-                break
-            #print("Sorry, what's your choice?")
+            try:
+                file_dict = self.execute_operations(file_path)
+            except FileNotFoundError:
+                print("Wrong input path: file not found")
+            except (ValueError, UnicodeDecodeError):
+                print("Unrecognized log file format")
+            except Exception:
+                print("An unknown error occurred while reading the file. Sorry for that!")
+            else:
+                self.info_data_dict.update(file_dict)
         print("No more files to analyse")
         
        
 
-    def select_operation(self, file_path):
+    def execute_operations(self, file_path):
         """
         Selects the operations to apply on the log file and writes the output file
         Arguments:
@@ -72,7 +60,6 @@ class Logfile_analyser:
         Returns:
             A JSON file with the performed operations
         """
-
         df = self.file_manipulator.import_csv_logfile(file_path)
         log_info = operations.Logfile_data_extractor(df)
         # prepare output structure as a dictionary
@@ -84,6 +71,11 @@ class Logfile_analyser:
         return {file_path : file_dict}
         
     def export_data_to_json(self, output_path):
+        """
+        Exports the dictionary with logfile info to a JSON file.
+        Arguments:
+            output_path: path to the JSON file
+        """
         json_object = json.dumps(self.info_data_dict, indent= len(self.info_data_dict))
         with open(output_path, mode='w') as outfile:
             outfile.write(json_object)
