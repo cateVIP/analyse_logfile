@@ -34,7 +34,7 @@ class Logfile_analyser:
             file_paths = [input_path]   
 
         for file_path in file_paths:
-            #print(f"File selected: '{file_path}'")
+            print(f"File selected: '{file_path}'")
             if file_path.split(".")[-1] == "gz":
                 try:
                     file_path = self.file_manipulator.unzip_file(file_path)
@@ -60,7 +60,7 @@ class Logfile_analyser:
                     self.info_data_dict.update(file_dict)
                 break
             #print("Sorry, what's your choice?")
-        #print("No more file to analyse")
+        print("No more files to analyse")
         
        
 
@@ -87,8 +87,3 @@ class Logfile_analyser:
         json_object = json.dumps(self.info_data_dict, indent= len(self.info_data_dict))
         with open(output_path, mode='w') as outfile:
             outfile.write(json_object)
-
-#if __name__ == '__main__':
-#    logfile = Logfile_analyser()
-#    my_file = logfile.analyse_folder('/Users/cate/py_projects/')
-#    logfile.export_to_json(my_dict=my_file, output_path='/Users/cate/py_projects/test.json')
