@@ -14,7 +14,9 @@ class File_Manipulator:
         Returns:
             the path of the unzipped file
         """
-        subprocess.run(["gzip", "-d", "-k",file_path])
+        p = subprocess.run(["gzip", "-d", "-k",file_path])
+        if p.returncode != 0:
+            raise FileNotFoundError
         return file_path[:-3]
 
     def import_csv_logfile(self, file_path):

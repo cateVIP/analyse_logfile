@@ -1,55 +1,64 @@
-import read_input
+import file_manipulator
 import operations
-from distutils import errors
 import json
 import os
 
-class Logfile_analyzer:
-    """Logfile_analyzer class
-    This class reads the user input to the log file(s) to be analysed, \
+class Logfile_analyser:
+    """Logfile_analyser class
+    This class reads the user input to the log file(s) to be analysed, 
         let the user select which operations perform and writes the output to a json file.
     """
 
     def __init__(self):
-        self.file_manipulator = read_input.File_Manipulator()
+        self.file_manipulator = file_manipulator.File_Manipulator()
         
     def read_path_from_user(self):
         """
-        Reads the path of the log file(s) from the user input and unzip the file if necessary.\
+        Reads the path of the log file(s) from the user input and unzip the file if necessary.
             Then performes the operations on the file(s).
         Returns:
             A JSON file for every logfile with the performed analysis
         """
-        input_file_path = input("Please, enter the input path: ")
-        
-        if input_file_path.split(".")[-1] == "gz":
-            input_file_path = self.file_manipulator.unzip_file(input_file_path)
-            
-        if os.path.splitext(input_file_path)[1][1:]== "log":
-            self.select_operation(input_file_path)
-        else:
-            onlyfiles = [f for f in os.listdir(input_file_path) if 
-                os.path.isfile(os.path.join(input_file_path, f))
-                and (os.path.splitext(os.path.join(input_file_path, f))[1][1:]== "log"
+        input_path = input("Please, enter the input path: ")
+        if os.path.isdir(input_path):
+            onlyfiles = [f for f in os.listdir(input_path) if 
+                os.path.isfile(os.path.join(input_path, f))
+                and (os.path.splitext(os.path.join(input_path, f))[1][1:]== "log"
                 or f[-7:] == ".log.gz"
                 )]
             print("Files in the directory: ")
             print(onlyfiles)    
-            for f in onlyfiles:
-                file_path = os.path.join(input_file_path, f)
-                if file_path.split(".")[-1] == "gz":
-                    input_file_path = self.file_manipulator.unzip_file(file_path)
-                while True:
-                    print("file selected: ", f)
-                    question = input("Do you want to analyse this file? ([y]/n]): ")
-                    if question == 'n':
-                        print("Ok, let's look at the next file")
-                        break
-                    elif question in ['y','']:
+            file_paths = [os.path.join(input_path, f) for f in onlyfiles]
+        else:
+            file_paths = [input_path]   
+            
+        for file_path in file_paths:
+            print(f"File selected: '{file_path}'")
+            if file_path.split(".")[-1] == "gz":
+                try:
+                    file_path = self.file_manipulator.unzip_file(file_path)
+                except FileNotFoundError:
+                    print(f"The file '{file_path}' is not in gzip format. Skipping.")
+                    continue
+    
+            while True:
+                #print("file selected: ", file_path)
+                answer = input("Do you want to analyse this file? ([y]/n]): ")
+                if answer == 'n':
+                    print("Ok, let's look at the next file")
+                    break
+                elif answer in ['y','']:
+                    try:
                         self.select_operation(file_path)
-                        break
-                    print("Sorry, what's your choice?")
-            print("No more files to analyse")
+                    except FileNotFoundError:
+                        print("Wrong input path: file not found")
+                    except (ValueError, UnicodeDecodeError):
+                        print("Unrecognized log file format")
+                    except Exception:
+                        print("An unknown error occurred while reading the file. Sorry for that!")
+                    break
+                print("Sorry, what's your choice?")
+        print("No more file to analyse")
 
 
     def select_operation(self, file_path):
@@ -97,7 +106,8 @@ class Logfile_analyzer:
                     "2: Least frequent IP\n" \
                     "3: Events per second\n" \
                     "4: Total amounts of bytes exchanged\n" \
-                    "5: Exit\n"
+                    "5: Save to JSON\n" \
+                    "6: Exit\n"
                     ) )
 
             # If something else that is not the string
@@ -107,7 +117,10 @@ class Logfile_analyzer:
                 print("Error! This is not a number. Try again.\n")
 
             else:
-                if input_operation == 5:
+                if input_operation == 6:
+                    print("Thanks, see you next time!")
+                    break
+                elif input_operation == 5:
                     output_path = input("Thanks! Please, enter the output path for the JSON file: ")
                     # remove empty keys
                     empty_keys = {k: v for k, v in my_dict.items() if not v}
@@ -127,4 +140,3 @@ class Logfile_analyzer:
                         print("You have already selected this operation. Please try another one. \n")
                 else: 
                     print("There is no operation available with this number! Try again.\n")
-

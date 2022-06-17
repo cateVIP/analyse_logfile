@@ -1,5 +1,4 @@
 import pandas as pd
-from distutils import errors
 
 class Logfile_data_extractor:
   """Logfile_data_extractor class
@@ -17,12 +16,15 @@ class Logfile_data_extractor:
     # check these are IP addresses
     check_ip = self.df['Client_IP'].str.split('.').apply(len).unique()
     if len(check_ip) != 1 or check_ip != 4:
-        print("These seem not IP addresses, please check your format with the settings")  
+        print("Warning: These seem not to be IP addresses, please check your format with the settings")  
          
-    ip_freq = self.df['Client_IP'].value_counts().rename_axis('Client_IP').reset_index(name='counts') # drops Nas by default
-    max_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].max()]
-    min_value = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].min()]
-    return max_value, min_value
+    ip_freq = self.df['Client_IP'].value_counts().rename_axis('Client_IP').reset_index(name='counts') # drops Nan by default
+    # In the sample file, the most frequent ip address is the local host
+    # if this is not what we are interested in, we can filter it out
+    # but then the log file will shrink significantly
+    most_freq_ip = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].max()]
+    least_freq_ip = ip_freq.loc[ip_freq['counts'] == ip_freq['counts'].min()]
+    return most_freq_ip, least_freq_ip
 
   def events_per_sec(self):
     """
@@ -37,7 +39,7 @@ class Logfile_data_extractor:
     nrows1 = self.df.shape[0]
     self.df.dropna(subset=['Timestamp'], inplace =True) # once sorted, the Nas will be at the end of the dataframe (by Timestamp)
     if (nrows1 - self.df.shape[0])/nrows1*100 < 80:
-        print("More than 20% of the rowns have Nas in the Timestamp column.") 
+        print("Warning: More than 20% of the rows have Nan in the Timestamp column.") 
     # time span of the log file
     time_span = self.df['Timestamp'].iloc[-1] - self.df['Timestamp'].iloc[0]
     # compute the events per seconds as total number of rows divided by the time span
