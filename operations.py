@@ -38,7 +38,7 @@ class Logfile_data_extractor:
     self.df.sort_values('Timestamp', inplace = True)
     nrows1 = self.df.shape[0]
     self.df.dropna(subset=['Timestamp'], inplace =True) # once sorted, the Nas will be at the end of the dataframe (by Timestamp)
-    if (nrows1 - self.df.shape[0])/nrows1*100 < 80:
+    if (self.df.shape[0]/nrows1) < 0.8:
         print("Warning: More than 20% of the rows have Nan in the Timestamp column.") 
     # time span of the log file
     time_span = self.df['Timestamp'].iloc[-1] - self.df['Timestamp'].iloc[0]
