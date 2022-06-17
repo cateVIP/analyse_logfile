@@ -8,8 +8,8 @@ def main(argv):
     outputfile = ''
 
     def fail():
-        print('This tool must be run with options.\n' \
-        'Commad line options are: -i <inputfile> -o <outputfile>')
+        print('This tool must be run with command line options:\n' \
+        '    -i <input log file or directory>\n    -o <output json file>')
         sys.exit(2)
     try:
         opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
