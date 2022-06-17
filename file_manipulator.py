@@ -4,11 +4,12 @@ import settings
 
 class File_Manipulator:
     """File_Manipulator class
-    This class prepares the logfiles to be analysed, first unzipping the files if necessary, then converting thme to a pandas Dataframe.
+    This class prepares the logfiles to be analysed, first unzipping the files if necessary, 
+    then converting them to a pandas Dataframe.
     """
     def unzip_file(self, file_path):
         """
-        Unzip gz files.
+        Unzip .gz files.
         Arguments:
             file_path: path of the .gz file
         Returns:

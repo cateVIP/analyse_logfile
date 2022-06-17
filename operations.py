@@ -11,7 +11,7 @@ class Logfile_data_extractor:
     """
     Computes the most and lest frequent IP addresses in the log file.
     Returns:
-        tuple of two dataframes, with the most and least IP addresses together with their counts.
+        tuple of two pandas dataframes, with the most and least frequent IP addresses together with their counts.
     """
     # check these are IP addresses
     check_ip = self.df['Client_IP'].str.split('.').apply(len).unique()
@@ -48,7 +48,7 @@ class Logfile_data_extractor:
    
   def total_bytes(self):
     """
-    Compute the total bytes exchanged
+    Computes the total bytes exchanged
     Returns:
         number of bytes 
     """

@@ -6,7 +6,7 @@ import os
 class Logfile_analyser:
     """Logfile_analyser class
     This class reads the user input to the log file(s) to be analysed, 
-        let the user select which operations perform and writes the output to a json file.
+        lets the user select which operations to perform and writes the output to a json file.
     """
 
     def __init__(self):
@@ -14,8 +14,8 @@ class Logfile_analyser:
         
     def read_path_from_user(self):
         """
-        Reads the path of the log file(s) from the user input and unzip the file if necessary.
-            Then performes the operations on the file(s).
+        Reads the path of the log file(s) from the user input and unzips the file(s) if necessary.
+            Then performs the operations on the file(s).
         Returns:
             A JSON file for every logfile with the performed analysis
         """
@@ -42,7 +42,6 @@ class Logfile_analyser:
                     continue
     
             while True:
-                #print("file selected: ", file_path)
                 answer = input("Do you want to analyse this file? ([y]/n]): ")
                 if answer == 'n':
                     print("Ok, let's look at the next file")
@@ -106,7 +105,7 @@ class Logfile_analyser:
                     "2: Least frequent IP\n" \
                     "3: Events per second\n" \
                     "4: Total amounts of bytes exchanged\n" \
-                    "5: Save to JSON\n" \
+                    "5: Save to JSON and exit\n" \
                     "6: Exit\n"
                     ) )
 
